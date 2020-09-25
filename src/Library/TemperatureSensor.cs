@@ -1,28 +1,29 @@
 ﻿using System.Threading;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Observer
 {
-    public class TemperatureSensor
+    public class TemperatureSensor : IObservable
     {
         private List<TemperatureReporter> observers = new List<TemperatureReporter>();
 
         public Temperature Current { get; private set; }
 
-        public void Subscribe(TemperatureReporter observer)
+        public void Subscribe(IObserver observer)
         {
             if (! observers.Contains(observer))
             {
-                observers.Add(observer);
+                observers.Add((TemperatureReporter)observer);
             }
         }
 
-        public void Unsubscribe(TemperatureReporter observer)
+        public void Unsubscribe(IObserver observer)
         {
             if (observers.Contains(observer))
             {
-                this.observers.Remove(observer);
+                this.observers.Remove((TemperatureReporter)observer);
             }
         }
 
@@ -44,7 +45,7 @@ namespace Observer
                         this.Current = new Temperature(temp.Value, DateTime.Now);
                         foreach (var observer in observers)
                         {
-                            observer.Update();
+                            observer.Update(this.Current);
                         }
                         previous = temp;
                         if (start)
